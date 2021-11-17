@@ -1,0 +1,2375 @@
+{
+	"info": {
+		"_postman_id": "0672d9a2-14ca-41fc-904f-4c71b2b91b91",
+		"name": "PAYTR APIs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "iFrame API",
+			"item": [
+				{
+					"name": "get-iframe-token",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"const userIp = pm.environment.get('user_ip');",
+									"const moid = 'POSTMAN' + Date.now() + 'PAYTR';",
+									"",
+									"pm.environment.set(\"merchant_oid\", moid); // Benzersiz sipariş numarası",
+									"",
+									"// Ürün Adı - Birim Fiyatı - Adet",
+									"let basket = [",
+									"    [\"Ürün Adı 1\", \"18.00\", 1],",
+									"    [\"Ürün Adı 1\", \"18.00\", 1]",
+									"];",
+									"",
+									"// UserBasket => Dokümantasyonu inceleyiniz.",
+									"const userBasket = btoa(unescape(encodeURIComponent(JSON.stringify(basket))));",
+									"pm.environment.set(\"iframe_user_basket\", userBasket);",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"const body = mid + userIp + moid + rq.email + rq.payment_amount + userBasket + rq.no_installment + rq.max_installment + rq.currency + rq.test_mode;",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"iframe_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "merchant_id",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası.",
+									"type": "text"
+								},
+								{
+									"key": "merchant_oid",
+									"value": "{{merchant_oid}}",
+									"description": "Sipariş numarası. Her işlem için benzersiz olmalıdır. Maks 64 karakter. Alfa numerik.",
+									"type": "text"
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{iframe_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+									"type": "text"
+								},
+								{
+									"key": "payment_amount",
+									"value": "1000",
+									"description": "Sipariş tutarı. Tutar * 100 olarak hesaplanmalıdır.",
+									"type": "text"
+								},
+								{
+									"key": "user_name",
+									"value": "User Name",
+									"description": "Müşteri ad soyad. Maks. 60 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "user_address",
+									"value": "User Address",
+									"description": "Müşteri adresi. Maks. 400 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "example@mail.com",
+									"description": "Müşteri e-posta. Maks. 100 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "user_phone",
+									"value": "55512345670",
+									"description": "Müşteri telefon numarası. Maks. 20 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "user_ip",
+									"value": "{{user_ip}}",
+									"description": "Müşteri IP. Maks. 39 karakter (IPV4).",
+									"type": "text"
+								},
+								{
+									"key": "user_basket",
+									"value": "{{iframe_user_basket}}",
+									"description": "Sepet içeriği. Müşterinin siparişindeki ürün/hizmet bilgilerini içermelidi.",
+									"type": "text"
+								},
+								{
+									"key": "currency",
+									"value": "TL",
+									"description": "TL veya TRY - USD - EUR - GBP - RUB. Boş gönderilirse TL olarak kabul edilir.",
+									"type": "text"
+								},
+								{
+									"key": "no_installment",
+									"value": "0",
+									"description": "0 veya 1. Eğer 1 olarak gönderilirse taksit seçenekleri gösterilmez (tek çekim).",
+									"type": "text"
+								},
+								{
+									"key": "max_installment",
+									"value": "0",
+									"description": "2-12 arası. Gösterilecek en fazlataksit sayısını belirler. 0 gönderilmesi durumunda yürürlükteki en fazla izin verilen taksit geçerli olur.",
+									"type": "text"
+								},
+								{
+									"key": "lang",
+									"value": "tr",
+									"description": "tr veya en. Ödeme sürecinde sayfalarda kullanılacak dil. Boş gönderilirse tr kabul edilir.",
+									"type": "text"
+								},
+								{
+									"key": "merchant_ok_url",
+									"value": "http://www.siteniz.com/odeme_basarili.php",
+									"description": "Müşterinin başarılı ödeme sonrası yönlendirileceği sayfa. Maks. 400 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "merchant_fail_url",
+									"value": "http://www.siteniz.com/odeme_hata.php",
+									"description": "Müşterinin ödemesi sırasında beklenmeyen bir hatada yönlendirileceği sayfa. Maks. 400 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "debug_on",
+									"value": "1",
+									"description": "0 veya 1. Hata mesajlarını ekrana bastırmak için 1 girin.",
+									"type": "text"
+								},
+								{
+									"key": "test_mode",
+									"value": "1",
+									"description": "0 veya 1. Mağaza canlı modda iken test işlem yapmak için 1 girin.",
+									"type": "text"
+								},
+								{
+									"key": "timeout_limit",
+									"value": "30",
+									"description": "İşlem zaman aşım süresi. Dakika cinsinden. Varsayılan 30 dakikadır.",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/odeme/api/get-token",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"odeme",
+								"api",
+								"get-token"
+							]
+						},
+						"description": "# iFrame API\n\niFrame ödeme ekranını açarken kullanacağınız `iframe_token` değerini döner.\n\n> `paytr_token`, `user_basket` ve `merchant_oid` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır.\n\nBu isteği BackEnd tarafında göndermeniz, FrontEnd tarafına `iframe_token` değerini dönmelisiniz.\n\niFrame `src` parametresi aşağıdaki gibi olmalıdır;\n\nhttps://www.paytr.com/odeme/guvenli/iframe_token\n\n**Bu servisin 2. adımı için dokümanı inceleyiniz.**"
+					},
+					"response": []
+				}
+			],
+			"description": "iFrame ödeme penceresini açarken kullanacağınız token değerini döndürür."
+		},
+		{
+			"name": "Havale/EFT iFrame API",
+			"item": [
+				{
+					"name": "get-eft-iframe-token",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"const userIp = pm.environment.get('user_ip');",
+									"const moid = 'POSTMAN' + Date.now() + 'PAYTR';",
+									"",
+									"pm.environment.set(\"merchant_oid\", moid); // Benzersiz sipariş numarası",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"const body = mid + userIp + moid + rq.email + rq.payment_amount + rq.payment_type + rq.test_mode;",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"eft_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "merchant_id",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası.",
+									"type": "text"
+								},
+								{
+									"key": "merchant_oid",
+									"value": "{{merchant_oid}}",
+									"description": "Sipariş numarası. Her işlem için benzersiz olmalıdır. Maks 64 karakter. Alfa numerik.",
+									"type": "text"
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{eft_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+									"type": "text"
+								},
+								{
+									"key": "payment_type",
+									"value": "eft",
+									"description": "Ödeme yöntemi.",
+									"type": "text"
+								},
+								{
+									"key": "payment_amount",
+									"value": "1000",
+									"description": "Sipariş tutarı. Tutar * 100 olarak hesaplanmalıdır.",
+									"type": "text"
+								},
+								{
+									"key": "user_ip",
+									"value": "{{user_ip}}",
+									"description": "Müşteri IP. Maks. 39 karakter (IPV4).",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "example@mail.com",
+									"description": "Müşteri e-posta. Maks. 100 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "debug_on",
+									"value": "1",
+									"description": "0 veya 1. Hata mesajlarını ekrana bastırmak için 1 girin.",
+									"type": "text"
+								},
+								{
+									"key": "test_mode",
+									"value": "1",
+									"description": "0 veya 1. Mağaza canlı modda iken test işlem yapmak için 1 girin.",
+									"type": "text"
+								},
+								{
+									"key": "timeout_limit",
+									"value": "30",
+									"description": "İşlem zaman aşım süresi. Dakika cinsinden. Varsayılan 30 dakikadır.",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/odeme/api/get-token",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"odeme",
+								"api",
+								"get-token"
+							]
+						},
+						"description": "# Havale/EFT iFrame API\n\nHavale/EFT iFrame API ödeme ekranını açarken kullanacağınız `iframe_token` değerini döner.\n\n> `paytr_token` ve `merchant_oid` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır.\n\nBu isteği BackEnd tarafında göndermeniz, FrontEnd tarafına `iframe_token` değerini dönmelisiniz.\n\niFrame `src` parametresi aşağıdaki gibi olmalıdır;\n\nhttps://www.paytr.com/odeme/api/iframe_token\n\n**Bu servisin 2. adımı için dokümanı inceleyiniz.**"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Link API",
+			"item": [
+				{
+					"name": "Create",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"let body = rq.name + rq.price + rq.currency + rq.max_installment + rq.link_type + rq.lang;",
+									"",
+									"if(rq.link_type == \"product\"){",
+									"    body += rq.min_count;",
+									"}",
+									"",
+									"if(rq.link_type == \"collection\"){",
+									"    body += rq.email;",
+									"}",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"link_create_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "merchant_id",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası.",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "Örnek Ürün Adı 1",
+									"description": "Ürün / Hizmetin açıklaması. En az 4 en fazla 200 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "1000",
+									"description": "Ürün tutarı. Tutar * 100 olarak hesaplanmalıdır.",
+									"type": "text"
+								},
+								{
+									"key": "currency",
+									"value": "TL",
+									"description": "TL - USD - EUR - GBP - RUB. Boş gönderilirse TL olarak kabul edilir.",
+									"type": "text"
+								},
+								{
+									"key": "max_installment",
+									"value": "12",
+									"description": "En fazla taksit sayısı. 2 – 12 arası gönderilebilir. 1 gönderilirse bireysel kartlarla taksitli işlem yapılamaz.",
+									"type": "text"
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{link_create_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+									"type": "text"
+								},
+								{
+									"key": "link_type",
+									"value": "product",
+									"description": "Ürün hizmet satışı için: product / Fatura/Cari tahsilat için: collection",
+									"type": "text"
+								},
+								{
+									"key": "debug_on",
+									"value": "1",
+									"description": "0 veya 1. Hata mesajlarını ekrana bastırmak için 1 girin.",
+									"type": "text"
+								},
+								{
+									"key": "min_count",
+									"value": "1",
+									"description": "Alt adet limiti (Link tipi product ise zorunlu). En az 1.",
+									"type": "text"
+								},
+								{
+									"key": "max_count",
+									"value": "1",
+									"description": "Stok adedi. Yalnızca product tipinde kullanılabilir. Link'in stok adedini belirler ve gönderilmezse stok limiti uygulanmaz. Stok adedi kadar ödeme yapıldığında link pasif olur. En az 1.",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "example@mail.com",
+									"description": "E-posta adresi (Link tipi collection ise zorunlu). En fazla 100 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "lang",
+									"value": "tr",
+									"description": "tr veya en. Boş gönderilirse tr geçerli olur.",
+									"type": "text"
+								},
+								{
+									"key": "callback_link",
+									"value": "http://siteniz.com/callback/",
+									"description": "Ödeme sonucunun gönderileceği URL. Localhost olmamalı.",
+									"type": "text"
+								},
+								{
+									"key": "callback_id",
+									"value": "XXX595995",
+									"description": "Bildirimde dönülecek ID.  callback_link gönderildiğinde bu alanında gönderilmesi zorunludur. Alfanumerik ve en fazla 64 karakter olabilir.",
+									"type": "text"
+								},
+								{
+									"key": "expiry_date",
+									"value": "2021-11-30 18:00:00",
+									"description": "Linkin son kullanma tarihi. Ödeme Link'inin son kullanma tarihi. Gönderilmezse, sürekli açık kalır. Format: 2021-05-31 17:00:00",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/odeme/api/link/create",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"odeme",
+								"api",
+								"link",
+								"create"
+							]
+						},
+						"description": "# Linkle Ödeme\n\nBu serviste ürün veya hizmetleriniz için ödeme linkleri oluşturabilirsiniz.\n\n> `paytr_token` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır.\n\n**Bu servisin callback adımı için dokümanı inceleyiniz.**"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"let body = rq.id + mid;",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"link_delete_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "merchant_id",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası."
+								},
+								{
+									"key": "id",
+									"value": "xxxxxx",
+									"description": "Link API Create metodundan dönülen değer."
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{link_delete_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin."
+								},
+								{
+									"key": "debug_on",
+									"value": "1",
+									"description": "0 veya 1. Hata mesajlarını ekrana bastırmak için 1 girin."
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/odeme/api/link/delete",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"odeme",
+								"api",
+								"link",
+								"delete"
+							]
+						},
+						"description": "# Linkle Ödeme - Delete\n\nBu serviste ürün veya hizmetleriniz için oluşturduğunuz ödeme linklerini silebilirsiniz.\n\n> `paytr_token` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır."
+					},
+					"response": []
+				},
+				{
+					"name": "Send SMS",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"let body = rq.id + mid + rq.cell_phone;",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"link_sms_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "merchant_id",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası.",
+									"type": "text"
+								},
+								{
+									"key": "id",
+									"value": "xxxxxx",
+									"description": "Link API Create metodundan dönülen değer.",
+									"type": "text"
+								},
+								{
+									"key": "cell_phone",
+									"value": "05551234567",
+									"description": "Linki göndermek istediğiniz telefon numarası. SMS gönderilecek numara. 05 ile başlamalı ve 11 hane olmalıdır.",
+									"type": "text"
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{link_sms_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin."
+								},
+								{
+									"key": "debug_on",
+									"value": "1",
+									"description": "0 veya 1. Hata mesajlarını ekrana bastırmak için 1 girin."
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/odeme/api/link/send-sms",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"odeme",
+								"api",
+								"link",
+								"send-sms"
+							]
+						},
+						"description": "# Linkle Ödeme - SMS\n\nBu servisi kullanarak belirttiğiniz cep telefon numarasına oluşturduğunuz ürün/hizmet linkine ait ödeme sayfası bağlantısını SMS gönderebilirsiniz.\n\n> `paytr_token` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır."
+					},
+					"response": []
+				},
+				{
+					"name": "Send Email",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"let body = rq.id + mid + rq.email;",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"link_mail_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "merchant_id",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası."
+								},
+								{
+									"key": "id",
+									"value": "xxxxxx",
+									"description": "Link API Create metodundan dönülen değer."
+								},
+								{
+									"key": "email",
+									"value": "example@mail.com",
+									"description": "Linki göndermek istediğini eposta bilgisi. En fazla 100 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{link_mail_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin."
+								},
+								{
+									"key": "debug_on",
+									"value": "1",
+									"description": "0 veya 1. Hata mesajlarını ekrana bastırmak için 1 girin."
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/odeme/api/link/send-email",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"odeme",
+								"api",
+								"link",
+								"send-email"
+							]
+						},
+						"description": "# Linkle Ödeme - E-posta\n\nBu servisi kullanarak belirttiğiniz e-posta adresine oluşturduğunuz ürün/hizmet linkine ait ödeme sayfası bağlantısını mail gönderebilirsiniz.\n\n> `paytr_token` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Direkt API",
+			"item": [
+				{
+					"name": "Kart Saklama API",
+					"item": [
+						{
+							"name": "Kayıtlı Kart Listesi",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const rq = request.data;",
+											"",
+											"const mid = pm.environment.get('merchant_id');",
+											"const salt = pm.environment.get('merchant_salt');",
+											"const key = pm.environment.get('merchant_key');",
+											"",
+											"// PaytrToken => Dokümantasyonu inceleyiniz.",
+											"const body = rq.utoken + salt;",
+											"",
+											"var hash = CryptoJS.HmacSHA256(body, key);",
+											"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+											"",
+											"pm.environment.set(\"kart_kayit_liste_paytr_token\", hashInBase64);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "merchant_id",
+											"value": "{{merchant_id}}",
+											"description": "Mağaza numarası.",
+											"type": "text"
+										},
+										{
+											"key": "utoken",
+											"value": "eyQwesxJs",
+											"description": "Kart kayıt sonrası ödeme bildiriminde tarafınıza PayTR sisteminden bildirilen kullanıcıya özel token.",
+											"type": "text"
+										},
+										{
+											"key": "paytr_token",
+											"value": "{{kart_kayit_liste_paytr_token}}",
+											"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "https://www.paytr.com/odeme/capi/list",
+									"protocol": "https",
+									"host": [
+										"www",
+										"paytr",
+										"com"
+									],
+									"path": [
+										"odeme",
+										"capi",
+										"list"
+									]
+								},
+								"description": "# Kart Saklama - Kayıtlı Kart Listesi\n\nBu servis ödeme isteği göndermeden önce, kullanıcının kayıtlı olan kartları listelemek için kullanılır.\n\n> `paytr_token`, `user_basket` ve `merchant_oid` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır."
+							},
+							"response": []
+						},
+						{
+							"name": "Kayıtlı Kart Silme",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const rq = request.data;",
+											"",
+											"const mid = pm.environment.get('merchant_id');",
+											"const salt = pm.environment.get('merchant_salt');",
+											"const key = pm.environment.get('merchant_key');",
+											"",
+											"// PaytrToken => Dokümantasyonu inceleyiniz.",
+											"const body = rq.ctoken + rq.utoken + salt;",
+											"",
+											"var hash = CryptoJS.HmacSHA256(body, key);",
+											"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+											"",
+											"pm.environment.set(\"kart_kayit_silme_paytr_token\", hashInBase64);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "merchant_id",
+											"value": "{{merchant_id}}",
+											"description": "Mağaza numarası.",
+											"type": "text"
+										},
+										{
+											"key": "ctoken",
+											"value": "aB64xyzAJhklEqRty",
+											"description": "CAPI LIST servisinden kullanıcınıza ait karta token bilgisi.",
+											"type": "text"
+										},
+										{
+											"key": "utoken",
+											"value": "eyQwesxJs",
+											"description": "Kart kayıt sonrası ödeme bildiriminde tarafınıza PayTR sisteminden bildirilen kullanıcıya özel token.",
+											"type": "text"
+										},
+										{
+											"key": "paytr_token",
+											"value": "{{kart_kayit_silme_paytr_token}}",
+											"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "https://www.paytr.com/odeme/capi/delete",
+									"protocol": "https",
+									"host": [
+										"www",
+										"paytr",
+										"com"
+									],
+									"path": [
+										"odeme",
+										"capi",
+										"delete"
+									]
+								},
+								"description": "# Kart Saklama - Kayıtlı Kart Silme\n\nBu servis kullanıcının kayıtlı kartını silmek için kullanılır.\n\n> `paytr_token`, `user_basket` ve `merchant_oid` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır."
+							},
+							"response": []
+						},
+						{
+							"name": "Yeni Kart Ekleme",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"function htmlEntities(str) {",
+											"    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');",
+											"}",
+											"",
+											"const rq = request.data;",
+											"",
+											"const mid = pm.environment.get('merchant_id');",
+											"const salt = pm.environment.get('merchant_salt');",
+											"const key = pm.environment.get('merchant_key');",
+											"",
+											"const userIp = pm.environment.get('user_ip');",
+											"const moid = 'POSTMAN' + Date.now() + 'PAYTR';",
+											"",
+											"pm.environment.set(\"merchant_oid\", moid); // Benzersiz sipariş numarası",
+											"",
+											"// Ürün Adı - Birim Fiyatı - Adet",
+											"let basket = [",
+											"    [\"Ürün Adı 1\", \"18.00\", 1],",
+											"    [\"Ürün Adı 1\", \"18.00\", 1]",
+											"];",
+											"",
+											"// UserBasket => Dokümantasyonu inceleyiniz.",
+											"const userBasket = htmlEntities(JSON.stringify(basket));",
+											"console.log(userBasket);",
+											"pm.environment.set(\"direkt_user_basket\", userBasket);",
+											"",
+											"// PaytrToken => Dokümantasyonu inceleyiniz.",
+											"const body = mid + userIp + moid + rq.email + rq.payment_amount + rq.payment_type + rq.installment_count + rq.currency + rq.test_mode + rq.non_3d;",
+											"",
+											"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+											"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+											"",
+											"pm.environment.set(\"direkt_paytr_token\", hashInBase64);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "cc_owner",
+											"value": "PAYTR TEST",
+											"description": "Kart sahibi.",
+											"type": "text"
+										},
+										{
+											"key": "card_number",
+											"value": "4355084355084358",
+											"description": "Kart numarası.",
+											"type": "text"
+										},
+										{
+											"key": "expiry_month",
+											"value": "12",
+											"description": "Kart son kullanma tarihi (Ay).",
+											"type": "text"
+										},
+										{
+											"key": "expiry_year",
+											"value": "24",
+											"description": "Kart son kullanma tarihi (Yıl).",
+											"type": "text"
+										},
+										{
+											"key": "cvv",
+											"value": "000",
+											"description": "Kart güvenlik kodu.",
+											"type": "text"
+										},
+										{
+											"key": "card_type",
+											"value": "bonus",
+											"description": "Kart tipi (Taksitli işlemlerde kullanmak üzere).  advantage, axess, combo, bonus, cardfinans, maximum, paraf, world, saglamkart.",
+											"type": "text"
+										},
+										{
+											"key": "merchant_id",
+											"value": "{{merchant_id}}",
+											"description": "Mağaza numarası.",
+											"type": "text"
+										},
+										{
+											"key": "merchant_oid",
+											"value": "{{merchant_oid}}",
+											"description": "Sipariş numarası. Her işlem için benzersiz olmalıdır. Maks 64 karakter. Alfa numerik.",
+											"type": "text"
+										},
+										{
+											"key": "paytr_token",
+											"value": "{{direkt_paytr_token}}",
+											"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+											"type": "text"
+										},
+										{
+											"key": "payment_amount",
+											"value": "9.99",
+											"description": "Sipariş tutarı. Ondalık olarak nokta (.) ve noktadan sonra iki hane.",
+											"type": "text"
+										},
+										{
+											"key": "payment_type",
+											"value": "card",
+											"description": "Ödeme tipi. card veya card_points.",
+											"type": "text"
+										},
+										{
+											"key": "non_3d",
+											"value": "0",
+											"description": "0 veya 1. Non 3D işlem yapabilmek için 1 gönderilebilir.",
+											"type": "text"
+										},
+										{
+											"key": "non3d_test_failed",
+											"value": "1",
+											"description": "0 veya 1. Non 3D işlemde, başarısız işlem durumunu test etmek için 1 gönderilir (test_mode ve non_3d değerleri 1 ise dikkate alınır!)",
+											"type": "text"
+										},
+										{
+											"key": "sync_mode",
+											"value": "0",
+											"description": "0 veya 1. İlgili yetkinin mağazaya tanımlanabilmesi için tarafımıza talep iletilmesi gerekmektedir. Birimlerimizin onayından geçmesi halinden yetki mağazaya tanımlanacaktır. Daha fazla bilgi için dokümantasyonu inceleyiniz.",
+											"type": "text"
+										},
+										{
+											"key": "user_name",
+											"value": "User Name",
+											"description": "Müşteri ad soyad. Maks. 60 karakter.",
+											"type": "text"
+										},
+										{
+											"key": "user_address",
+											"value": "User Address",
+											"description": "Müşteri adresi. Maks. 400 karakter.",
+											"type": "text"
+										},
+										{
+											"key": "email",
+											"value": "example@mail.com",
+											"description": "Müşteri e-posta. Maks. 100 karakter.",
+											"type": "text"
+										},
+										{
+											"key": "user_phone",
+											"value": "55512345670",
+											"description": "Müşteri telefon numarası. Maks. 20 karakter",
+											"type": "text"
+										},
+										{
+											"key": "user_ip",
+											"value": "{{user_ip}}",
+											"description": "Müşteri IP. Maks. 39 karakter (IPV4).",
+											"type": "text"
+										},
+										{
+											"key": "user_basket",
+											"value": "{{direkt_user_basket}}",
+											"description": "Sepet içeriği. Müşterinin siparişindeki ürün/hizmet bilgilerini içermelidi.",
+											"type": "text"
+										},
+										{
+											"key": "currency",
+											"value": "TL",
+											"description": "TL veya TRY - USD - EUR - GBP - RUB. Boş gönderilirse TL olarak kabul edilir.",
+											"type": "text"
+										},
+										{
+											"key": "installment_count",
+											"value": "0",
+											"description": "Taksit sayısı. 0, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12",
+											"type": "text"
+										},
+										{
+											"key": "client_lang",
+											"value": "tr",
+											"description": "tr veya en. Ödeme sürecinde sayfalarda kullanılacak dil. Boş gönderilirse tr kabul edilir.",
+											"type": "text"
+										},
+										{
+											"key": "merchant_ok_url",
+											"value": "http://www.siteniz.com/odeme_basarili.php",
+											"description": "Müşterinin başarılı ödeme sonrası yönlendirileceği sayfa. Maks. 400 karakter.",
+											"type": "text"
+										},
+										{
+											"key": "merchant_fail_url",
+											"value": "http://www.siteniz.com/odeme_hata.php",
+											"description": "Müşterinin ödemesi sırasında beklenmeyen bir hatada yönlendirileceği sayfa.",
+											"type": "text"
+										},
+										{
+											"key": "debug_on",
+											"value": "1",
+											"description": "0 veya 1. Hata mesajlarını ekrana bastırmak için 1 girin.",
+											"type": "text"
+										},
+										{
+											"key": "test_mode",
+											"value": "1",
+											"description": "0 veya 1. Mağaza canlı modda iken test işlem yapmak için 1 girin.",
+											"type": "text"
+										},
+										{
+											"key": "timeout_limit",
+											"value": "30",
+											"description": "İşlem zaman aşım süresi. Dakika cinsinden. Varsayılan 30 dakikadır.",
+											"type": "text"
+										},
+										{
+											"key": "utoken",
+											"value": "",
+											"description": "Müşteriye ait var olan utoken değeri. Daha fazla bilgi için dokümantasyonu okuyunuz.",
+											"type": "text"
+										},
+										{
+											"key": "store_card",
+											"value": "1",
+											"description": "0 veya 1. Daha fazla bilgi için dokümantasyonu okuyunuz.",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "https://www.paytr.com/odeme",
+									"protocol": "https",
+									"host": [
+										"www",
+										"paytr",
+										"com"
+									],
+									"path": [
+										"odeme"
+									]
+								},
+								"description": "# Kart Saklama - Yeni Kart Ekleme\n\nDirekt API Ödeme akışı ile birlikte çalışır.\n\n> `paytr_token`, `user_basket` ve `merchant_oid` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır.\n\n* Direkt API Dokümanında belirtildiği şekilde ödeme sayfanızı oluşturun.\n\n* Kredi kartı bilgilerinin girildiği adımda kullanıcıya kartını kayıt etmek istediğini seçebileceği bir onay kutucuğu ekleyin.\n\n* Kullanıcı kart bilgilerini kaydetmeyi seçerse gerekli bilgileri `POST` içeriğine ekleyin:\n   *  Kullanıcı adına sistemde ilk kez bir kart kaydediliyorsa `POST` içeriğinde yalnızca `store_card` parametresi gönderilir.\n   *  Kullanıcının daha önceden sistemde tanımlanmış bir kartı varsa ve yeni bir kart kaydetmek istiyorsa, `POST` içeriğinde `utoken` ve `store_card` parametreleri birlikte gönderilmelidir.\n\n* Ödemenin sonucunda gelen bildirimde (Bildirim URL’e), kart saklama için gönderilen aşağıdaki değerleri ilgili tablolarınıza kaydedin ve bir sonraki işlem için hazır durumda tutun.\n\n**utoken**: `utoken` gönderilmediği durumda, bu kullanıcıya ait daha önceden kaydedilmiş bir kart olmadığı varsayılır. PayTR tarafında yeni bir `utoken` oluşturularak ödeme işleminin devamında döndürülür. (BİLDİRİM URL'E) Eğer kullanıcı sisteminizde daha önce bir kart kaydetmişse tarafınızda kayıtlı `utoken` parametresini `POST` içeriğine eklemelisiniz. Böylece bu kart da aynı kullanıcıya tanımlanacaktır. Eğer mevcut kullanıcı için yeni bir kart tanımı yapılacağı halde mevcut `utoken` gönderilmezse yeni bir `utoken` oluşturalacağından kullanıcının tüm kartları tek bir `utoken` altında gruplanmaz.\n\n**store_card**: Kullanıcı adına sistemde ilk kez bir kart kaydediliyorsa `POST` içeriğinde yalnızca `store_card` parametresi gönderilir.Kullanıcının daha önceden sistemde tanımlanmış bir kartı varsa ve yeni bir kart kaydetmek istiyorsa, `POST` içeriğinde `utoken` ve `store_card` parametreleri birlikte gönderilmelidir.\n\n**Bu servisin 2. adımı için dokümanı inceleyiniz.**\n\n---\n\n### Test Kart bilgileri\n\n* PAYTR TEST 4355084355084358 12/24 000\n* PAYTR TEST 5406675406675403 12/24 000\n* PAYTR TEST 9792030394440796 12/24 000"
+							},
+							"response": []
+						},
+						{
+							"name": "Kayıtlı Karttan Ödeme",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"function htmlEntities(str) {",
+											"    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');",
+											"}",
+											"",
+											"const rq = request.data;",
+											"",
+											"const mid = pm.environment.get('merchant_id');",
+											"const salt = pm.environment.get('merchant_salt');",
+											"const key = pm.environment.get('merchant_key');",
+											"",
+											"const userIp = pm.environment.get('user_ip');",
+											"const moid = 'POSTMAN' + Date.now() + 'PAYTR';",
+											"",
+											"pm.environment.set(\"merchant_oid\", moid); // Benzersiz sipariş numarası",
+											"",
+											"// Ürün Adı - Birim Fiyatı - Adet",
+											"let basket = [",
+											"    [\"Ürün Adı 1\", \"18.00\", 1],",
+											"    [\"Ürün Adı 1\", \"18.00\", 1]",
+											"];",
+											"",
+											"// UserBasket => Dokümantasyonu inceleyiniz.",
+											"const userBasket = htmlEntities(JSON.stringify(basket));",
+											"console.log(userBasket);",
+											"pm.environment.set(\"direkt_user_basket\", userBasket);",
+											"",
+											"// PaytrToken => Dokümantasyonu inceleyiniz.",
+											"const body = mid + userIp + moid + rq.email + rq.payment_amount + rq.payment_type + rq.installment_count + rq.currency + rq.test_mode + rq.non_3d;",
+											"",
+											"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+											"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+											"",
+											"pm.environment.set(\"direkt_paytr_token\", hashInBase64);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "cvv",
+											"value": "000",
+											"description": "Kart güvenlik kodu.",
+											"type": "text"
+										},
+										{
+											"key": "card_type",
+											"value": "bonus",
+											"description": "Kart tipi (Taksitli işlemlerde kullanmak üzere).  advantage, axess, combo, bonus, cardfinans, maximum, paraf, world, saglamkart.",
+											"type": "text"
+										},
+										{
+											"key": "merchant_id",
+											"value": "{{merchant_id}}",
+											"description": "Mağaza numarası.",
+											"type": "text"
+										},
+										{
+											"key": "merchant_oid",
+											"value": "{{merchant_oid}}",
+											"description": "Sipariş numarası. Her işlem için benzersiz olmalıdır. Maks 64 karakter. Alfa numerik.",
+											"type": "text"
+										},
+										{
+											"key": "paytr_token",
+											"value": "{{direkt_paytr_token}}",
+											"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+											"type": "text"
+										},
+										{
+											"key": "payment_amount",
+											"value": "9.99",
+											"description": "Sipariş tutarı. Ondalık olarak nokta (.) ve noktadan sonra iki hane.",
+											"type": "text"
+										},
+										{
+											"key": "payment_type",
+											"value": "card",
+											"description": "Ödeme tipi. card veya card_points.",
+											"type": "text"
+										},
+										{
+											"key": "non_3d",
+											"value": "0",
+											"description": "0 veya 1. Non 3D işlem yapabilmek için 1 gönderilebilir.",
+											"type": "text"
+										},
+										{
+											"key": "non3d_test_failed",
+											"value": "1",
+											"description": "0 veya 1. Non 3D işlemde, başarısız işlem durumunu test etmek için 1 gönderilir (test_mode ve non_3d değerleri 1 ise dikkate alınır!)",
+											"type": "text"
+										},
+										{
+											"key": "sync_mode",
+											"value": "0",
+											"description": "0 veya 1. İlgili yetkinin mağazaya tanımlanabilmesi için tarafımıza talep iletilmesi gerekmektedir. Birimlerimizin onayından geçmesi halinden yetki mağazaya tanımlanacaktır. Daha fazla bilgi için dokümantasyonu inceleyiniz.",
+											"type": "text"
+										},
+										{
+											"key": "user_name",
+											"value": "User Name",
+											"description": "Müşteri ad soyad. Maks. 60 karakter.",
+											"type": "text"
+										},
+										{
+											"key": "user_address",
+											"value": "User Address",
+											"description": "Müşteri adresi. Maks. 400 karakter.",
+											"type": "text"
+										},
+										{
+											"key": "email",
+											"value": "example@mail.com",
+											"description": "Müşteri e-posta. Maks. 100 karakter.",
+											"type": "text"
+										},
+										{
+											"key": "user_phone",
+											"value": "55512345670",
+											"description": "Müşteri telefon numarası. Maks. 20 karakter",
+											"type": "text"
+										},
+										{
+											"key": "user_ip",
+											"value": "{{user_ip}}",
+											"description": "Müşteri IP. Maks. 39 karakter (IPV4).",
+											"type": "text"
+										},
+										{
+											"key": "user_basket",
+											"value": "{{direkt_user_basket}}",
+											"description": "Sepet içeriği. Müşterinin siparişindeki ürün/hizmet bilgilerini içermelidi.",
+											"type": "text"
+										},
+										{
+											"key": "currency",
+											"value": "TL",
+											"description": "TL veya TRY - USD - EUR - GBP - RUB. Boş gönderilirse TL olarak kabul edilir.",
+											"type": "text"
+										},
+										{
+											"key": "installment_count",
+											"value": "0",
+											"description": "Taksit sayısı. 0, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12",
+											"type": "text"
+										},
+										{
+											"key": "client_lang",
+											"value": "tr",
+											"description": "tr veya en. Ödeme sürecinde sayfalarda kullanılacak dil. Boş gönderilirse tr kabul edilir.",
+											"type": "text"
+										},
+										{
+											"key": "merchant_ok_url",
+											"value": "http://www.siteniz.com/odeme_basarili.php",
+											"description": "Müşterinin başarılı ödeme sonrası yönlendirileceği sayfa. Maks. 400 karakter.",
+											"type": "text"
+										},
+										{
+											"key": "merchant_fail_url",
+											"value": "http://www.siteniz.com/odeme_hata.php",
+											"description": "Müşterinin ödemesi sırasında beklenmeyen bir hatada yönlendirileceği sayfa.",
+											"type": "text"
+										},
+										{
+											"key": "debug_on",
+											"value": "1",
+											"description": "0 veya 1. Hata mesajlarını ekrana bastırmak için 1 girin.",
+											"type": "text"
+										},
+										{
+											"key": "test_mode",
+											"value": "1",
+											"description": "0 veya 1. Mağaza canlı modda iken test işlem yapmak için 1 girin.",
+											"type": "text"
+										},
+										{
+											"key": "timeout_limit",
+											"value": "30",
+											"description": "İşlem zaman aşım süresi. Dakika cinsinden. Varsayılan 30 dakikadır.",
+											"type": "text"
+										},
+										{
+											"key": "utoken",
+											"value": "",
+											"description": "Kullanıcıya ait kartı kaydederken servisten tarafınıza dönen ve sizin sistemininiz üzerinden kullacınızla eşleştirdiğiniz değer.",
+											"type": "text"
+										},
+										{
+											"key": "ctoken",
+											"value": "",
+											"description": "CAPI LIST servisinden dönen kullanıcının kayıtlı kartına ait ctoken değeri.",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "https://www.paytr.com/odeme",
+									"protocol": "https",
+									"host": [
+										"www",
+										"paytr",
+										"com"
+									],
+									"path": [
+										"odeme"
+									]
+								},
+								"description": "# Kart Saklama - Kayıtlı Karttan Ödeme\n\nDirekt API Ödeme akışı ile birlikte çalışır. Bu servis örnek olması açısından oluşturulmuştur. Doğrudan çalışmaz. Kayıtlı kart bilgisini almak için önce **Kayıtlı Kart Listesi** servisini kullanmalısınız.\n\n> `paytr_token`, `user_basket` ve `merchant_oid` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır.\n\n1. Ödeme işlemini yapan kullanıcının kayıtlı kart listesi alınarak kullanıcının önüne listelenir.\n1. Kullanıcı listelenen kartlar arasından ödeme yapacağı kartı seçer.\n1. Kullanıcının seçtiği karta ait `require_cvv` parametresi kontrol edilip eğer 1 ise `CVV` gireceği alan gösterilir.\n1. Kullanıcının seçtiği kartın `ctoken` bilgisi ve kullanıcının `utoken` bilgisi ödeme isteğinde gönderilir.\n\n**Bu servisin 2. adımı için dokümanı inceleyiniz.**\n\n---\n\n### Test Kart bilgileri\n\n* PAYTR TEST 4355084355084358 12/24 000\n* PAYTR TEST 5406675406675403 12/24 000\n* PAYTR TEST 9792030394440796 12/24 000"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Taksit Oranları Sorgulama",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"let body = mid + rq.request_id;",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"taksit_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "merchant_id",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası.",
+									"type": "text"
+								},
+								{
+									"key": "request_id",
+									"value": "1959874464874",
+									"description": "İstek atılırken oluşturulacak rastgele değer.",
+									"type": "text"
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{taksit_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/odeme/taksit-oranlari",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"odeme",
+								"taksit-oranlari"
+							]
+						},
+						"description": "# Taksit Oranları Sorgulama\n\nDirekt API entegrasyonu yapılırken, taksit oranlarını çekmek için taksit oranları sorgulama API kullanılır. Oranlar günlük olarak değişebilir. Bu nedenle bu oranları günlük olarak taksit oranları sorgulama API aracılığıyla çekip, veritabanına kaydedebilir, güncelleyebilirsiniz. Bu oranları taksitli işlemlerde ürün fiyatına göre uygulayabilirsiniz.\n\n> `paytr_token` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır."
+					},
+					"response": []
+				},
+				{
+					"name": "BIN Sorgulama Servisi",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"let body = rq.bin_number + mid;",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"bin_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "merchant_id",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası.",
+									"type": "text"
+								},
+								{
+									"key": "bin_number",
+									"value": "526911",
+									"description": "Sorgulama yapılmak istenen karta ait BIN numarası. Kartın ilk 6 hanesi.",
+									"type": "text"
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{bin_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/odeme/api/bin-detail",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"odeme",
+								"api",
+								"bin-detail"
+							]
+						},
+						"description": "# BIN Sorgulama\n\nBIN sorgulama servisi ile bir BIN numarası gönderip kartın detaylı bilgilerine ulaşabilirsiniz.\n\n> `paytr_token` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır."
+					},
+					"response": []
+				},
+				{
+					"name": "Direkt API",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"function htmlEntities(str) {",
+									"    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');",
+									"}",
+									"",
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"const userIp = pm.environment.get('user_ip');",
+									"const moid = 'POSTMAN' + Date.now() + 'PAYTR';",
+									"",
+									"pm.environment.set(\"merchant_oid\", moid); // Benzersiz sipariş numarası",
+									"",
+									"// Ürün Adı - Birim Fiyatı - Adet",
+									"let basket = [",
+									"    [\"Ürün Adı 1\", \"18.00\", 1],",
+									"    [\"Ürün Adı 1\", \"18.00\", 1]",
+									"];",
+									"",
+									"// UserBasket => Dokümantasyonu inceleyiniz.",
+									"const userBasket = htmlEntities(JSON.stringify(basket));",
+									"console.log(userBasket);",
+									"pm.environment.set(\"direkt_user_basket\", userBasket);",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"const body = mid + userIp + moid + rq.email + rq.payment_amount + rq.payment_type + rq.installment_count + rq.currency + rq.test_mode + rq.non_3d;",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"direkt_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "cc_owner",
+									"value": "PAYTR TEST",
+									"description": "Kart sahibi.",
+									"type": "text"
+								},
+								{
+									"key": "card_number",
+									"value": "4355084355084358",
+									"description": "Kart numarası.",
+									"type": "text"
+								},
+								{
+									"key": "expiry_month",
+									"value": "12",
+									"description": "Kart son kullanma tarihi (Ay).",
+									"type": "text"
+								},
+								{
+									"key": "expiry_year",
+									"value": "24",
+									"description": "Kart son kullanma tarihi (Yıl).",
+									"type": "text"
+								},
+								{
+									"key": "cvv",
+									"value": "000",
+									"description": "Kart güvenlik kodu.",
+									"type": "text"
+								},
+								{
+									"key": "card_type",
+									"value": "bonus",
+									"description": "Kart tipi (Taksitli işlemlerde kullanmak üzere).  advantage, axess, combo, bonus, cardfinans, maximum, paraf, world, saglamkart.",
+									"type": "text"
+								},
+								{
+									"key": "merchant_id",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası.",
+									"type": "text"
+								},
+								{
+									"key": "merchant_oid",
+									"value": "{{merchant_oid}}",
+									"description": "Sipariş numarası. Her işlem için benzersiz olmalıdır. Maks 64 karakter. Alfa numerik.",
+									"type": "text"
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{direkt_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+									"type": "text"
+								},
+								{
+									"key": "payment_amount",
+									"value": "9.99",
+									"description": "Sipariş tutarı. Ondalık olarak nokta (.) ve noktadan sonra iki hane.",
+									"type": "text"
+								},
+								{
+									"key": "payment_type",
+									"value": "card",
+									"description": "Ödeme tipi. card veya card_points.",
+									"type": "text"
+								},
+								{
+									"key": "non_3d",
+									"value": "0",
+									"description": "0 veya 1. Non 3D işlem yapabilmek için 1 gönderilebilir.",
+									"type": "text"
+								},
+								{
+									"key": "non3d_test_failed",
+									"value": "1",
+									"description": "0 veya 1. Non 3D işlemde, başarısız işlem durumunu test etmek için 1 gönderilir (test_mode ve non_3d değerleri 1 ise dikkate alınır!)",
+									"type": "text"
+								},
+								{
+									"key": "sync_mode",
+									"value": "0",
+									"description": "0 veya 1. İlgili yetkinin mağazaya tanımlanabilmesi için tarafımıza talep iletilmesi gerekmektedir. Birimlerimizin onayından geçmesi halinden yetki mağazaya tanımlanacaktır. Daha fazla bilgi için dokümantasyonu inceleyiniz.",
+									"type": "text"
+								},
+								{
+									"key": "user_name",
+									"value": "User Name",
+									"description": "Müşteri ad soyad. Maks. 60 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "user_address",
+									"value": "User Address",
+									"description": "Müşteri adresi. Maks. 400 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "example@mail.com",
+									"description": "Müşteri e-posta. Maks. 100 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "user_phone",
+									"value": "55512345670",
+									"description": "Müşteri telefon numarası. Maks. 20 karakter",
+									"type": "text"
+								},
+								{
+									"key": "user_ip",
+									"value": "{{user_ip}}",
+									"description": "Müşteri IP. Maks. 39 karakter (IPV4).",
+									"type": "text"
+								},
+								{
+									"key": "user_basket",
+									"value": "{{direkt_user_basket}}",
+									"description": "Sepet içeriği. Müşterinin siparişindeki ürün/hizmet bilgilerini içermelidi.",
+									"type": "text"
+								},
+								{
+									"key": "currency",
+									"value": "TL",
+									"description": "TL veya TRY - USD - EUR - GBP - RUB. Boş gönderilirse TL olarak kabul edilir.",
+									"type": "text"
+								},
+								{
+									"key": "installment_count",
+									"value": "0",
+									"description": "Taksit sayısı. 0, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12",
+									"type": "text"
+								},
+								{
+									"key": "client_lang",
+									"value": "tr",
+									"description": "tr veya en. Ödeme sürecinde sayfalarda kullanılacak dil. Boş gönderilirse tr kabul edilir.",
+									"type": "text"
+								},
+								{
+									"key": "merchant_ok_url",
+									"value": "http://www.siteniz.com/odeme_basarili.php",
+									"description": "Müşterinin başarılı ödeme sonrası yönlendirileceği sayfa. Maks. 400 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "merchant_fail_url",
+									"value": "http://www.siteniz.com/odeme_hata.php",
+									"description": "Müşterinin ödemesi sırasında beklenmeyen bir hatada yönlendirileceği sayfa.",
+									"type": "text"
+								},
+								{
+									"key": "debug_on",
+									"value": "1",
+									"description": "0 veya 1. Hata mesajlarını ekrana bastırmak için 1 girin.",
+									"type": "text"
+								},
+								{
+									"key": "test_mode",
+									"value": "1",
+									"description": "0 veya 1. Mağaza canlı modda iken test işlem yapmak için 1 girin.",
+									"type": "text"
+								},
+								{
+									"key": "timeout_limit",
+									"value": "30",
+									"description": "İşlem zaman aşım süresi. Dakika cinsinden. Varsayılan 30 dakikadır.",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/odeme",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"odeme"
+							]
+						},
+						"description": "# Direkt API\n\nÖdeme formunda müşteri kart bilgilerini alarak isteği başlatmalısınız. Kart bilgileri haricinde diğer parametreleri gizli tutmalısınız.\n\n> `paytr_token`, `user_basket` ve `merchant_oid` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır.\n\n**Sync Mode**: Ödeme isteğinin gönderilmesi ardından işlem sonucuna göre başarılı veya başarısız sayfasına yönlendirme yapılmadan, JSON formatında olan yanıt direkt olarak istek sonucuna döner. Ek olarak; işleme ait detaylar tanımlı olan Bildirim URL adresine gönderilir. Sync mode sonucunda dönen `status` alanının alabileceği değerler `failed`, `wait_callback` ve `success` şeklindedir.Not: Bu işlem için mağazanızda Non3D yetkisinin açık olması gerekmektedir.\n\n**Bu servisin 2. adımı için dokümanı inceleyiniz.**\n\n---\n\n### Test Kart bilgileri\n\n* PAYTR TEST 4355084355084358 12/24 000\n* PAYTR TEST 5406675406675403 12/24 000\n* PAYTR TEST 9792030394440796 12/24 000"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Platform Transfer Talebi",
+			"item": [
+				{
+					"name": "Transfer Talimatı Ver",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"const transId = 'POSTMAN' + Date.now() + 'PAYTR';",
+									"",
+									"pm.environment.set(\"platform_transfer_trans_id\", transId); // Benzersiz işlem numarası",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"const body = mid + rq.merchant_oid + transId + rq.submerchant_amount + rq.total_amount + rq.transfer_name + rq.transfer_iban;",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"platform_transfer_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "merchant_id",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası.",
+									"type": "text"
+								},
+								{
+									"key": "merchant_oid",
+									"value": "1959874464874",
+									"description": "Sipariş numarası. Her işlem için benzersiz olmalıdır. Maks 64 karakter. Alfa numerik.",
+									"type": "text"
+								},
+								{
+									"key": "trans_id",
+									"value": "{{platform_transfer_trans_id}}",
+									"description": "Satıcıya yapılacak bu ödemenin takibi için benzersiz takip numarası. Alfanumerik – En fazla 60 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "submerchant_amount",
+									"value": "1000",
+									"description": "Satıcıya yapılacak ödeme tutarı. Tutar*100.",
+									"type": "text"
+								},
+								{
+									"key": "total_amount",
+									"value": "1000",
+									"description": "Toplam ödeme tutarı. Tutar*100",
+									"type": "text"
+								},
+								{
+									"key": "transfer_name",
+									"value": "User Name",
+									"description": "Satıcının banka hesabı için ad soyad/ünvanı",
+									"type": "text"
+								},
+								{
+									"key": "transfer_iban",
+									"value": "TRXXXXXXXXXXXXXXXXXXXXXXXX",
+									"description": "Satıcının banka hesabı IBAN numarası (26 karakter).",
+									"type": "text"
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{platform_transfer_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/odeme/platform/transfer",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"odeme",
+								"platform",
+								"transfer"
+							]
+						},
+						"description": "# Platform Transfer Talebi - Transfer Talimatı\n\n> `paytr_token` ve `trans_id` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır."
+					},
+					"response": []
+				},
+				{
+					"name": "Geri Dönen Transfer Listesi",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"const body = mid + rq.start_date + rq.end_date;",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"platform_transfer_geri_donen_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "merchant_id",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası.",
+									"type": "text"
+								},
+								{
+									"key": "start_date",
+									"value": "2021-11-01 00:00:00",
+									"description": "Başlangıç Tarihi. Format 2021-01-01 00:00:00 (YYYY-MM-DD hh:mm:ss)",
+									"type": "text"
+								},
+								{
+									"key": "end_date",
+									"value": "2021-11-30 00:00:00",
+									"description": "Bitiş Tarihi. 2021-01-01 23:59:59 (YYYY-MM-DD hh:mm:ss)",
+									"type": "text"
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{platform_transfer_geri_donen_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+									"type": "text"
+								},
+								{
+									"key": "dummy",
+									"value": "1",
+									"description": "0 veya 1. Servisten dönen verileri simule etmek için kullanılır. Dönen değerler gerçek değildir, test amaçlı gözlem içindir (demo veri).",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/odeme/geri-donen-transfer",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"odeme",
+								"geri-donen-transfer"
+							]
+						},
+						"description": "# Platform Transfer Talebi - Geri Dönen Transfer Listesi\n\n> `paytr_token` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır."
+					},
+					"response": []
+				},
+				{
+					"name": "Geri Dönen Ödemeleri Hesaptan Gönder",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"// TransferInfo",
+									"const tInfo = [",
+									"    {\"amount\": \"1000\", \"receiver\": \"XYZ LTD ŞTİ\", \"iban\": \"TRXXXXXXXXXXXXXXXXXXXXX\"}",
+									"];",
+									"pm.environment.set(\"platform_transfer_geri_donen_hesap_trans_info\", JSON.stringify(tInfo));",
+									"",
+									"const transId = 'POSTMAN' + Date.now() + 'PAYTR';",
+									"pm.environment.set(\"platform_transfer_trans_id\", transId); // Benzersiz işlem numarası",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"const body = mid + transId;",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"platform_transfer_geri_donen_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "merchant_id",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası.",
+									"type": "text"
+								},
+								{
+									"key": "trans_id",
+									"value": "{{platform_transfer_trans_id}}",
+									"description": "Transfer işlemi için belirlediğiniz benzersiz işlem numarası.",
+									"type": "text"
+								},
+								{
+									"key": "trans_info",
+									"value": "{{platform_transfer_geri_donen_hesap_trans_info}}",
+									"description": "Bu alanın oluşturulması için dokümanı inceleyiniz.",
+									"type": "text"
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{platform_transfer_geri_donen_hesap_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/odeme/hesaptan-gonder",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"odeme",
+								"hesaptan-gonder"
+							]
+						},
+						"description": "# Platform Transfer Talebi - Geri Dönen Ödemeleri Hesaptan Gönder\n\n> `paytr_token`, `trans_id` ve `trans_info` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "İade API",
+			"item": [
+				{
+					"name": "İade",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"const body = mid + rq.merchant_oid + rq.return_amount;",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"refund_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "merchant_id",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası.",
+									"type": "text"
+								},
+								{
+									"key": "merchant_oid",
+									"value": "xxxxxxxxxxxxxxx",
+									"description": "İade yapılacak sipariş numarası.",
+									"type": "text"
+								},
+								{
+									"key": "return_amount",
+									"value": "11.97",
+									"description": "İade yapılacak tutar. Ayraç olarak yalnızca bir nokta (.) gönderilmelidir.",
+									"type": "text"
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{refund_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/odeme/iade",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"odeme",
+								"iade"
+							]
+						},
+						"description": "# İade API\n\nBu servis başarılı ödemeleri iade etmek için kullanılır.\n\n> `paytr_token` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Durum Sorgu API",
+			"item": [
+				{
+					"name": "Durum Sorgulama",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"const body = mid + rq.merchant_oid;",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"magaza_durum_sorgu_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "merchant_id",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası.",
+									"type": "text"
+								},
+								{
+									"key": "merchant_oid",
+									"value": "xxxxxxxxxxxxx",
+									"description": "Sipariş Numarası.",
+									"type": "text"
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{magaza_durum_sorgu_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/odeme/durum-sorgu",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"odeme",
+								"durum-sorgu"
+							]
+						},
+						"description": "# Durum Sorgu API\n\nBu servisi ile PayTR üzerinde gerçekleştirilen işlemlerin durumunu sorgulayabilirsiniz.\n\n> `paytr_token` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "BKM Express",
+			"item": [
+				{
+					"name": "BKM Express iFrame",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"function htmlEntities(str) {",
+									"    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');",
+									"}",
+									"",
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"const userIp = pm.environment.get('user_ip');",
+									"const moid = 'POSTMAN' + Date.now() + 'PAYTR';",
+									"",
+									"pm.environment.set(\"merchant_oid\", moid); // Benzersiz sipariş numarası",
+									"",
+									"// Ürün Adı - Birim Fiyatı - Adet",
+									"let basket = [",
+									"    [\"Ürün Adı 1\", \"18.00\", 1],",
+									"    [\"Ürün Adı 1\", \"18.00\", 1]",
+									"];",
+									"",
+									"// UserBasket => Dokümantasyonu inceleyiniz.",
+									"const userBasket = htmlEntities(JSON.stringify(basket));",
+									"console.log(userBasket);",
+									"pm.environment.set(\"bkm_user_basket\", userBasket);",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"const body = mid + userIp + moid + rq.email + rq.payment_amount + rq.payment_type + rq.installment_count + rq.test_mode + rq.installment_options;",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"bkm_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "merchant_id",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası.",
+									"type": "text"
+								},
+								{
+									"key": "merchant_oid",
+									"value": "{{merchant_oid}}",
+									"description": "Sipariş numarası. Her işlem için benzersiz olmalıdır. Maks 64 karakter. Alfa numerik.",
+									"type": "text"
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{bkm_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+									"type": "text"
+								},
+								{
+									"key": "payment_amount",
+									"value": "1000",
+									"description": "Sipariş tutarı. Tutar * 100 olarak hesaplanmalıdır.",
+									"type": "text"
+								},
+								{
+									"key": "payment_type",
+									"value": "bex",
+									"description": "Bkm Express için bex olarak gönderilmesi gereklidir.",
+									"type": "text"
+								},
+								{
+									"key": "installment_options",
+									"value": "",
+									"description": "Opsiyoneldir. Boş bırakılırsa taksit seçenekleri gönderilmez. Örnek kodlar içerisinden taksit seçenekleri array'ine ulaşabilirsiniz. Daha fazla bilgi için dokümantasyonu inceleyiniz.",
+									"type": "text"
+								},
+								{
+									"key": "installment_count",
+									"value": "0",
+									"description": "Taksit Sayısı",
+									"type": "text"
+								},
+								{
+									"key": "user_name",
+									"value": "user name",
+									"description": "Müşteri ad soyad. Maks. 60 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "user_address",
+									"value": "user address",
+									"description": "Müşteri adresi. Maks. 400 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "example@mail.com",
+									"description": "Müşteri e-posta. Maks. 100 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "user_phone",
+									"value": "05551234567",
+									"description": "Müşteri telefon numarası. Maks. 20 karakter.",
+									"type": "text"
+								},
+								{
+									"key": "user_ip",
+									"value": "{{user_ip}}",
+									"description": "Müşteri IP. Maks. 39 karakter (IPV4).",
+									"type": "text"
+								},
+								{
+									"key": "user_basket",
+									"value": "{{bkm_user_basket}}",
+									"description": "Sepet içeriği. Müşterinin siparişindeki ürün/hizmet bilgilerini içermelidi.",
+									"type": "text"
+								},
+								{
+									"key": "debug_on",
+									"value": "1",
+									"description": "0 veya 1. Hata mesajlarını ekrana bastırmak için 1 girin.",
+									"type": "text"
+								},
+								{
+									"key": "test_mode",
+									"value": "1",
+									"description": "0 veya 1. Mağaza canlı modda iken test işlem yapmak için 1 girin.",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/odeme",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"odeme"
+							]
+						},
+						"description": "# BKM Express - iFrame Ödeme\n\nBKM Express Entegrasyonu iFrame ödeme yönteminde otomatik olarak ödeme ekranına gelmektedir. Ancak Direkt API çözümünde BKM Express entegrasyonu yaparken `payment_type` = `bex` olarak gönderilmesi gerekmektedir.\n\n> `paytr_token`, `user_basket` ve `merchant_oid` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır.\n\n---\n\n### BKM Express Test Kullanıcı Bilgileri\n\n* 0010@banka.com ZİRAAT BANKASI\n* 0012@banka.com HALK BANKASI\n* 0015@banka.com VAKIFBANK\n* 0032@banka.com TEB\n* 0046@banka.com AKBANK\n* 0062@banka.com GARANTİ\n* 0064@banka.com İŞBANK\n* 0067@banka.com YAPI KREDİ\n* 0134@banka.com DENİZBANK\n* 0111@banka.com, qnbfinans@bkm.com FİNANSBANK\n\n**Tüm kullanıcıların şifreleri 147258'dir.**"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "İşlem Dökümü",
+			"item": [
+				{
+					"name": "İşlem Dökümü Başlat",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const rq = request.data;",
+									"",
+									"const mid = pm.environment.get('merchant_id');",
+									"const salt = pm.environment.get('merchant_salt');",
+									"const key = pm.environment.get('merchant_key');",
+									"",
+									"// PaytrToken => Dokümantasyonu inceleyiniz.",
+									"const body = mid + rq.start_date + rq.end_date;",
+									"",
+									"var hash = CryptoJS.HmacSHA256(body + salt, key);",
+									"var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);",
+									"",
+									"pm.environment.set(\"islem_dokum_paytr_token\", hashInBase64);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "merchant_id\n",
+									"value": "{{merchant_id}}",
+									"description": "Mağaza numarası.",
+									"type": "text"
+								},
+								{
+									"key": "start_date",
+									"value": "2021-11-01 00:00:00",
+									"description": "Başlangıç Tarihi. Format  2021-01-01 00:00:00 (YYYY-MM-DD hh:mm:ss)",
+									"type": "text"
+								},
+								{
+									"key": "end_date",
+									"value": "2021-11-03 00:00:00",
+									"description": "Bitiş Tarihi: 2021-01-01 23:59:59 (YYYY-MM-DD hh:mm:ss)",
+									"type": "text"
+								},
+								{
+									"key": "paytr_token",
+									"value": "{{islem_dokum_paytr_token}}",
+									"description": "paytr_token üretimi için dokümantasyonu inceleyin.",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://www.paytr.com/rapor/islem-dokumu",
+							"protocol": "https",
+							"host": [
+								"www",
+								"paytr",
+								"com"
+							],
+							"path": [
+								"rapor",
+								"islem-dokumu"
+							]
+						},
+						"description": "# İşlem Dökümü\n\nBu servis ile iletilen tarih aralığındaki (en fazla 3 gün) yapılan satış ve iade işlemlerinin dökümünü alabilirsiniz.\n\n> `paytr_token` değeri `Pre-req.` ortamında hazırlanmakta ve bazı parametre değerleri ENV ortamından alınmaktadır."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "paytr_token",
+			"value": ""
+		}
+	]
+}
