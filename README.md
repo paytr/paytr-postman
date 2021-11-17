@@ -34,5 +34,3 @@ Postman tarafında kullanmanız için önceden hazırlanmış olan 2 adet dosya 
 - Request penceresinde bulunan form alanlarındaki değerleri kendi isteğinize göre değiştiriebilir, sonrasında **Send** butonuna tıklayarak servisi çağırabilirsiniz.
 - Ekranının alt kısmındaki Response panelinde, servisten dönen cevap olarak başarılı/hatalı çıktılar gösterilecektir.
 
-> **Tüm işlemler bu kadardı... PayTR servislerini test etmeye hemen başlayabilirsiniz.**
-
