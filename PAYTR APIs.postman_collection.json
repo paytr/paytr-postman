@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "0672d9a2-14ca-41fc-904f-4c71b2b91b91",
-		"name": "PAYTR APIs",
+		"_postman_id": "7e7ed105-fa66-438c-83d2-7c030740b511",
+		"name": "PAYTR APIs v1.1",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -1148,18 +1148,6 @@
 									"mode": "formdata",
 									"formdata": [
 										{
-											"key": "cvv",
-											"value": "000",
-											"description": "Kart güvenlik kodu.",
-											"type": "text"
-										},
-										{
-											"key": "card_type",
-											"value": "bonus",
-											"description": "Kart tipi (Taksitli işlemlerde kullanmak üzere).  advantage, axess, combo, bonus, cardfinans, maximum, paraf, world, saglamkart.",
-											"type": "text"
-										},
-										{
 											"key": "merchant_id",
 											"value": "{{merchant_id}}",
 											"description": "Mağaza numarası.",
@@ -1301,6 +1289,48 @@
 											"key": "ctoken",
 											"value": "",
 											"description": "CAPI LIST servisinden dönen kullanıcının kayıtlı kartına ait ctoken değeri.",
+											"type": "text"
+										},
+										{
+											"key": "cc_owner",
+											"value": "AD SOYAD",
+											"description": "Kart sahibi",
+											"type": "text"
+										},
+										{
+											"key": "card_number",
+											"value": "9792030394440796",
+											"description": "Test kart numaraları: 9792030394440796,4355084355084358,5406675406675403",
+											"type": "text"
+										},
+										{
+											"key": "cvv",
+											"value": "000",
+											"description": "Kart güvenlik kodu.",
+											"type": "text"
+										},
+										{
+											"key": "expiry_month",
+											"value": "12",
+											"description": "Kart son kullanma (AY)",
+											"type": "text"
+										},
+										{
+											"key": "expiry_year",
+											"value": "99",
+											"description": "Kart son kullanma (YIL)",
+											"type": "text"
+										},
+										{
+											"key": "card_type",
+											"value": "bonus",
+											"description": "Kart tipi (Taksitli işlemlerde kullanmak üzere).  advantage, axess, combo, bonus, cardfinans, maximum, paraf, world, saglamkart.",
+											"type": "text"
+										},
+										{
+											"key": "recurring",
+											"value": "",
+											"description": "0 veya 1(İlgili yetkinin mağazaya tanımlanabilmesi için tarafımıza talep iletilmesi gerekmektedir Birimlerimizin onayından geçmesi halinden yetki mağazaya tanımlanacaktır.)",
 											"type": "text"
 										}
 									]
