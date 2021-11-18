@@ -31,6 +31,6 @@ Postman tarafında kullanmanız için önceden hazırlanmış olan 2 adet dosya 
 - PayTR APIs adlı Collections içerisinden kullanmak istediğiniz API servisi seçin (Örneğin: iFrame API)
 - **get-iframe-token** adlı POST Request'e tıkladıktan sonra **Body** butonuna tıklayın
 - **form-data** kısmında önceden hazırlanmış verilere ek olarak, Environment kısmından gelen bazı global veriler bulumaktadır.
-- Request penceresinde bulunan form alanlarındaki değerleri kendi isteğinize göre değiştiriebilir, sonrasında **Send** butonuna tıklayarak servisi çağırabilirsiniz.
+- Request penceresinde bulunan form alanlarındaki değerleri kendi isteğinize göre değiştirebilir, sonrasında **Send** butonuna tıklayarak servisi çağırabilirsiniz.
 - Ekranının alt kısmındaki Response panelinde, servisten dönen cevap olarak başarılı/hatalı çıktılar gösterilecektir.
 
